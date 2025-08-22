@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>総当たり戦アプリ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom CSS for a better look */
+        .input-section, .output-section {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .buttons-container button {
+            transition: all 0.2s ease-in-out;
+            transform: scale(1);
+        }
+        .buttons-container button:hover {
+            transform: scale(1.05);
+        }
+        .buttons-container button:active {
+            transform: scale(0.95);
+        }
+        .scoreboard-container table, .round-robin-container table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .scoreboard-container th, .scoreboard-container td, .round-robin-container th, .round-robin-container td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+        .scoreboard-container thead, .round-robin-container thead {
+            background-color: #1f2937;
+            color: #fff;
+        }
+        .scoreboard-container th, .round-robin-container th {
+            font-weight: 600; /* semibold */
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .round-robin-container td {
+            text-align: center;
+        }
+        .match-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            position: relative; /* For positioning the check button */
+            transition: all 0.3s ease-in-out;
+        }
+        .match-card:not(:last-child) {
+            margin-bottom: 1rem;
+        }
+        .score-input input {
+            -moz-appearance: textfield;
+            width: 3.5rem;
+        }
+        .score-input input::-webkit-outer-spin-button,
+        .score-input input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .score-btn {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            border-radius: 9999px;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            transition: all 0.2s ease-in-out;
+        }
+        .score-btn:hover {
+            background-color: #d1d5db;
+        }
+        .score-btn:active {
+            transform: scale(0.95);
+        }
+        /* New styles for horizontal player names */
+        .match-players-horizontal {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: bold;
+            color: #1f2937; /* text-gray-900 */
+            margin-bottom: 0.5rem; /* space-y-1 */
+        }
+        .self-match {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        .win {
+            color: #16a34a; /* green-600 */
+        }
+        .lose {
+            color: #dc2626; /* red-600 */
+        }
+        .draw {
+            color: #f59e0b; /* yellow-500 */
+        }
+        /* Updated styles for Round Robin cells */
+        .round-robin-cell-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
+        .result-symbol {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: bold;
+        }
+        .score-text {
+            font-size: 0.75rem; /* text-xs */
+            color: #6b7280; /* gray-500 */
+            margin-top: 0.25rem;
+        }
+        /* New styles for the check button and completed state */
+        .match-card.completed {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #10b981; /* green-500 */
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1);
+        }
+        .match-card.completed .check-btn {
+            background-color: #10b981; /* green-500 */
+            color: #fff;
+        }
+        .check-btn {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px; /* full rounded */
+            background-color: #e5e7eb; /* gray-200 */
+            color: #6b7280; /* gray-500 */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .check-btn:hover {
+            background-color: #d1d5db; /* gray-300 */
+        }
+        .match-card.completed .check-btn:hover {
+            background-color: #059669; /* green-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center">
+    <div class="container max-w-5xl mx-auto space-y-8">
+        <div class="input-section text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                <i class="fas fa-trophy text-yellow-500"></i> 総当たり戦アプリ
+            </h1>
+            <div class="mt-8">
+                <label for="teams-input" class="block text-lg font-medium text-gray-700 mb-2">
+                    参加者名を入力してください（1行に1名）:
+                </label>
+                <textarea id="teams-input"
+                    class="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    placeholder="例：&#10;山田&#10;田中&#10;佐藤&#10;..."></textarea>
+                <div class="text-sm text-gray-500 text-left mt-1">
+                    <span id="player-count">現在 0 人入力済み</span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 mt-6 justify-center">
+                    <button id="generate-btn"
+                        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center gap-2">
+                        <i class="fas fa-play"></i> スケジュール生成
+                    </button>
+                    <button id="reset-btn"
+                        class="px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 hidden flex items-center justify-center gap-2">
+                        <i class="fas fa-redo"></i> リセット
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="output-section" class="output-section hidden">
+            <!-- New layout for mobile-first, stacking sections vertically -->
+            <div class="flex flex-col gap-8">
+                <!-- Round Robin Table Section -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <i class="fas fa-th text-purple-500"></i> 総当たり表
+                    </h2>
+                    <div class="overflow-x-auto rounded-xl shadow-md round-robin-container">
+                        <table id="round-robin-table">
+                            <thead>
+                                <tr id="round-robin-header">
+                                    <th></th> <!-- Empty cell for top-left corner -->
+                                </tr>
+                            </thead>
+                            <tbody id="round-robin-body" class="bg-white">
+                                <!-- Round robin rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Match Schedule Section -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <i class="fas fa-list-ol text-blue-500"></i> 対戦スケジュール
+                    </h2>
+                    <div id="match-schedule" class="match-schedule space-y-4"></div>
+                </div>
+
+                <!-- Scoreboard Section -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <i class="fas fa-table text-green-500"></i> 順位表
+                    </h2>
+                    <div class="overflow-x-auto rounded-xl shadow-md scoreboard-container">
+                        <table id="scoreboard">
+                            <thead>
+                                <tr>
+                                    <th>順位</th>
+                                    <th>参加者</th>
+                                    <th>勝</th>
+                                    <th>負</th>
+                                    <th>引分</th>
+                                    <th>得点</th>
+                                    <th>失点</th>
+                                    <th>得失点差</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scoreboard-body" class="bg-white">
+                                <!-- Scoreboard rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="start-new-game-btn" class="mt-4 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="fas fa-sync-alt"></i> もう1度同じメンバーで始める
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom message box -->
+    <div id="message-box" class="fixed top-4 right-4 bg-gray-800 text-white text-sm py-3 px-6 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none">
+        メッセージ
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const teamsInput = document.getElementById('teams-input');
+            const generateBtn = document.getElementById('generate-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const outputSection = document.getElementById('output-section');
+            const matchSchedule = document.getElementById('match-schedule');
+            const scoreboardBody = document.getElementById('scoreboard-body');
+            const roundRobinHeader = document.getElementById('round-robin-header');
+            const roundRobinBody = document.getElementById('round-robin-body');
+            const messageBox = document.getElementById('message-box');
+            const playerCountSpan = document.getElementById('player-count');
+            const startNewGameBtn = document.getElementById('start-new-game-btn'); // 新しいボタン
+
+            let teams = [];
+            let matches = [];
+            let teamStats = {};
+
+            // Helper function to show a temporary message
+            const showMessage = (message, type = 'info') => {
+                messageBox.textContent = message;
+                messageBox.classList.remove('bg-gray-800', 'bg-red-500', 'bg-green-500');
+                if (type === 'error') {
+                    messageBox.classList.add('bg-red-500');
+                } else if (type === 'success') {
+                    messageBox.classList.add('bg-green-500');
+                } else {
+                    messageBox.classList.add('bg-gray-800');
+                }
+                messageBox.classList.add('opacity-100');
+                messageBox.classList.remove('pointer-events-none');
+                setTimeout(() => {
+                    messageBox.classList.remove('opacity-100');
+                    messageBox.classList.add('pointer-events-none');
+                }, 3000);
+            };
+
+            // Function to update the player count display
+            const updatePlayerCount = () => {
+                const count = teamsInput.value.split('\n').filter(name => name.trim() !== '').length;
+                playerCountSpan.textContent = `現在 ${count} 人入力済み`;
+            };
+
+            // Event listener for the input field to update the count
+            teamsInput.addEventListener('input', updatePlayerCount);
+
+            // Event listener for the generate button
+            generateBtn.addEventListener('click', () => {
+                const teamNames = teamsInput.value.split('\n').map(name => name.trim()).filter(name => name !== '');
+                if (teamNames.length < 3) {
+                    showMessage('3人以上の参加者名を入力してください。', 'error');
+                    return;
+                }
+                
+                teams = teamNames;
+                generateSchedule();
+                updateScoreboard();
+                
+                teamsInput.classList.add('hidden');
+                generateBtn.classList.add('hidden');
+                resetBtn.classList.remove('hidden');
+                outputSection.classList.remove('hidden');
+            });
+            
+            // Event listener for the reset button
+            resetBtn.addEventListener('click', () => {
+                // Clear all data
+                teams = [];
+                matches = [];
+                teamStats = {};
+                
+                // Clear UI
+                teamsInput.value = '';
+                matchSchedule.innerHTML = '';
+                scoreboardBody.innerHTML = '';
+                roundRobinHeader.innerHTML = '<th></th>';
+                roundRobinBody.innerHTML = '';
+                
+                // Reset UI visibility
+                teamsInput.classList.remove('hidden');
+                generateBtn.classList.remove('hidden');
+                resetBtn.classList.add('hidden');
+                outputSection.classList.add('hidden');
+
+                // Reset the player count
+                updatePlayerCount();
+            });
+
+            // New event listener for the "Start New Game" button
+            startNewGameBtn.addEventListener('click', () => {
+                // Reset scores and match data, but keep the teams
+                matches = [];
+                teamStats = {};
+
+                // Clear UI sections that need to be regenerated
+                matchSchedule.innerHTML = '';
+                scoreboardBody.innerHTML = '';
+                roundRobinHeader.innerHTML = '<th></th>';
+                roundRobinBody.innerHTML = '';
+
+                // Regenerate the schedule with the same teams
+                generateSchedule();
+                updateScoreboard();
+                showMessage('新しい総当たり戦が開始されました。', 'success');
+            });
+
+
+            // Function to generate the round-robin schedule
+            const generateSchedule = () => {
+                matches = [];
+                teamStats = {};
+                
+                // Initialize team stats
+                teams.forEach(team => {
+                    teamStats[team] = { win: 0, lose: 0, draw: 0, score: 0, conceded: 0, points: 0, directWins: {} };
+                });
+
+                matchSchedule.innerHTML = '';
+                
+                let participants = [...teams];
+                const numTeams = participants.length;
+                
+                // --- Round Robin Table Generation ---
+                roundRobinHeader.innerHTML = '<th></th>';
+                roundRobinBody.innerHTML = '';
+                
+                participants.forEach(team => {
+                    const headerCell = document.createElement('th');
+                    headerCell.textContent = team;
+                    roundRobinHeader.appendChild(headerCell);
+                });
+
+                participants.forEach(rowTeam => {
+                    const row = document.createElement('tr');
+                    const headerCell = document.createElement('th');
+                    headerCell.textContent = rowTeam;
+                    row.appendChild(headerCell);
+
+                    participants.forEach(colTeam => {
+                        const cell = document.createElement('td');
+                        if (rowTeam === colTeam) {
+                            cell.classList.add('self-match');
+                            cell.textContent = '-';
+                        } else {
+                            // Unique ID for each cell to update it later
+                            cell.id = `rr-cell-${rowTeam}-${colTeam}`;
+                            cell.innerHTML = `<span>-</span>`; // Initial state
+                        }
+                        row.appendChild(cell);
+                    });
+                    roundRobinBody.appendChild(row);
+                });
+                
+                // --- Match Schedule Generation ---
+                if (numTeams % 2 !== 0) {
+                    // Add a dummy team for an odd number of teams
+                    participants.push('bye');
+                }
+                
+                const totalRounds = participants.length - 1;
+                
+                for (let round = 0; round < totalRounds; round++) {
+                    const roundHeader = document.createElement('h3');
+                    roundHeader.className = 'text-xl font-bold text-gray-700 mt-6 mb-4';
+                    roundHeader.textContent = `第${round + 1}回戦`;
+                    matchSchedule.appendChild(roundHeader);
+
+                    for (let i = 0; i < participants.length / 2; i++) {
+                        const team1 = participants[i];
+                        const team2 = participants[participants.length - 1 - i];
+
+                        if (team1 !== 'bye' && team2 !== 'bye') {
+                            const match = { team1, team2, winner: null, score1: 0, score2: 0, round: round + 1 };
+                            matches.push(match);
+                            
+                            const matchCard = document.createElement('div');
+                            matchCard.className = 'match-card flex flex-col items-center justify-between gap-4';
+                            matchCard.innerHTML = `
+                                <div class="match-players-horizontal">
+                                    <span>${team1}</span>
+                                    <span class="text-gray-500 font-bold text-base">vs</span>
+                                    <span>${team2}</span>
+                                </div>
+                                <div class="flex items-center justify-center gap-4">
+                                    <div class="score-input flex items-center gap-2">
+                                        <button class="score-btn minus-btn" data-team="1"><i class="fas fa-minus"></i></button>
+                                        <input type="number" placeholder="得点" min="0" class="score1 w-20 text-center px-2 py-1 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition-colors" value="0">
+                                        <button class="score-btn plus-btn" data-team="1"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                    <span class="text-xl font-bold text-gray-500">-</span>
+                                    <div class="score-input flex items-center gap-2">
+                                        <button class="score-btn minus-btn" data-team="2"><i class="fas fa-minus"></i></button>
+                                        <input type="number" placeholder="得点" min="0" class="score2 w-20 text-center px-2 py-1 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition-colors" value="0">
+                                        <button class="score-btn plus-btn" data-team="2"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="check-btn">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            `;
+                            
+                            matchSchedule.appendChild(matchCard);
+                            
+                            const score1Input = matchCard.querySelector('.score1');
+                            const score2Input = matchCard.querySelector('.score2');
+                            const checkBtn = matchCard.querySelector('.check-btn');
+
+                            // Event listener for the new check button
+                            checkBtn.addEventListener('click', () => {
+                                matchCard.classList.toggle('completed');
+                            });
+
+                            const plusBtns = matchCard.querySelectorAll('.plus-btn');
+                            const minusBtns = matchCard.querySelectorAll('.minus-btn');
+                            
+                            const updateMatchResult = () => {
+                                const score1 = parseInt(score1Input.value) || 0;
+                                const score2 = parseInt(score2Input.value) || 0;
+
+                                let winner = null;
+                                let resultSymbol1 = '';
+                                let resultSymbol2 = '';
+
+                                if (score1 > score2) {
+                                    winner = team1;
+                                    resultSymbol1 = '<span class="win result-symbol">〇</span>';
+                                    resultSymbol2 = '<span class="lose result-symbol">✕</span>';
+                                } else if (score2 > score1) {
+                                    winner = team2;
+                                    resultSymbol1 = '<span class="lose result-symbol">✕</span>';
+                                    resultSymbol2 = '<span class="win result-symbol">〇</span>';
+                                } else if (score1 > 0 || score2 > 0) {
+                                    winner = '引き分け';
+                                    resultSymbol1 = '<span class="draw result-symbol">△</span>';
+                                    resultSymbol2 = '<span class="draw result-symbol">△</span>';
+                                } else {
+                                    // No scores entered yet
+                                    resultSymbol1 = '<span class="text-gray-400">-</span>';
+                                    resultSymbol2 = '<span class="text-gray-400">-</span>';
+                                }
+                                
+                                match.winner = winner;
+                                match.score1 = score1;
+                                match.score2 = score2;
+                                
+                                // Update round robin table cells
+                                const rrCell1 = document.getElementById(`rr-cell-${team1}-${team2}`);
+                                if (rrCell1) rrCell1.innerHTML = `
+                                    <div class="round-robin-cell-content">
+                                        ${resultSymbol1}
+                                        <span class="score-text">${score1} - ${score2}</span>
+                                    </div>
+                                `;
+                                
+                                const rrCell2 = document.getElementById(`rr-cell-${team2}-${team1}`);
+                                if (rrCell2) rrCell2.innerHTML = `
+                                    <div class="round-robin-cell-content">
+                                        ${resultSymbol2}
+                                        <span class="score-text">${score2} - ${score1}</span>
+                                    </div>
+                                `;
+                                
+                                updateScoreboard();
+                            };
+                            
+                            // Event listeners for score inputs
+                            score1Input.addEventListener('input', updateMatchResult);
+                            score2Input.addEventListener('input', updateMatchResult);
+                            
+                            // Event listeners for plus/minus buttons
+                            plusBtns.forEach(btn => {
+                                btn.addEventListener('click', (e) => {
+                                    const teamIndex = e.currentTarget.dataset.team;
+                                    const scoreInput = teamIndex === '1' ? score1Input : score2Input;
+                                    scoreInput.value = parseInt(scoreInput.value) + 1;
+                                    updateMatchResult();
+                                });
+                            });
+                            minusBtns.forEach(btn => {
+                                btn.addEventListener('click', (e) => {
+                                    const teamIndex = e.currentTarget.dataset.team;
+                                    const scoreInput = teamIndex === '1' ? score1Input : score2Input;
+                                    const currentValue = parseInt(scoreInput.value);
+                                    if (currentValue > 0) {
+                                        scoreInput.value = currentValue - 1;
+                                        updateMatchResult();
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    // Rotate teams for the next round, keeping the first team fixed
+                    const fixedTeam = participants.shift();
+                    const rotatedPart = participants.pop();
+                    participants.unshift(rotatedPart);
+                    participants.unshift(fixedTeam);
+                }
+
+                // Remove the dummy team if it was added
+                if (participants.includes('bye')) {
+                    participants.splice(participants.indexOf('bye'), 1);
+                }
+            };
+            
+            // Function to update the scoreboard based on match results
+            const updateScoreboard = () => {
+                // Reset stats for all teams
+                const initialTeams = teams.filter(t => t !== 'bye');
+                initialTeams.forEach(team => {
+                    teamStats[team] = { win: 0, lose: 0, draw: 0, score: 0, conceded: 0, points: 0, matchesPlayed: 0, directWins: {} };
+                });
+
+                matches.forEach(match => {
+                    const { team1, team2, winner, score1, score2 } = match;
+                    
+                    if (winner) {
+                        // Update scores
+                        teamStats[team1].score += score1;
+                        teamStats[team1].conceded += score2;
+                        teamStats[team2].score += score2;
+                        teamStats[team2].conceded += score1;
+                        
+                        // Update wins/losses/draws
+                        if (winner === team1) {
+                            teamStats[team1].win++;
+                            teamStats[team2].lose++;
+                            teamStats[team1].points += 3;
+                            teamStats[team1].directWins[team2] = true;
+                            teamStats[team2].directWins[team1] = false;
+                        } else if (winner === team2) {
+                            teamStats[team2].win++;
+                            teamStats[team1].lose++;
+                            teamStats[team2].points += 3;
+                            teamStats[team1].directWins[team2] = false;
+                            teamStats[team2].directWins[team1] = true;
+                        } else if (winner === '引き分け') {
+                            teamStats[team1].draw++;
+                            teamStats[team2].draw++;
+                            teamStats[team1].points += 1;
+                            teamStats[team2].points += 1;
+                            teamStats[team1].directWins[team2] = null;
+                            teamStats[team2].directWins[team1] = null;
+                        }
+                    }
+                });
+                
+                // Calculate goal difference
+                for (const team in teamStats) {
+                    teamStats[team].goalDiff = teamStats[team].score - teamStats[team].conceded;
+                }
+                
+                // Sort teams for the scoreboard
+                const sortedTeams = Object.keys(teamStats).sort((a, b) => {
+                    // 1. Points (desc)
+                    if (teamStats[b].points !== teamStats[a].points) {
+                        return teamStats[b].points - teamStats[a].points;
+                    }
+                    // 2. Goal difference (desc)
+                    if (teamStats[b].goalDiff !== teamStats[a].goalDiff) {
+                        return teamStats[b].goalDiff - teamStats[a].goalDiff;
+                    }
+                    // 3. Direct confrontation (only if tied on points and goal difference)
+                    if (teamStats[a].directWins[b] !== undefined && teamStats[a].directWins[b] !== null) {
+                        if (teamStats[a].directWins[b] === true) {
+                            return -1; // 'a' wins against 'b'
+                        } else if (teamStats[a].directWins[b] === false) {
+                            return 1; // 'a' loses against 'b'
+                        }
+                    }
+                    // 4. Goals scored (desc)
+                    return teamStats[b].score - teamStats[a].score;
+                });
+                
+                // Render the scoreboard
+                scoreboardBody.innerHTML = '';
+                sortedTeams.forEach((team, index) => {
+                    const stats = teamStats[team];
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${team}</td>
+                        <td>${stats.win}</td>
+                        <td>${stats.lose}</td>
+                        <td>${stats.draw}</td>
+                        <td>${stats.score}</td>
+                        <td>${stats.conceded}</td>
+                        <td>${stats.goalDiff}</td>
+                    `;
+                    scoreboardBody.appendChild(row);
+                });
+            };
+
+            // Call the function initially to set the count to 0
+            updatePlayerCount();
+        });
+    </script>
+</body>
+</html>

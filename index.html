@@ -17,6 +17,7 @@
             padding: 2.5rem;
             border-radius: 1.5rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            position: relative; /* Add relative positioning for absolute child elements */
         }
         .buttons-container button {
             transition: all 0.2s ease-in-out;
@@ -161,11 +162,48 @@
         .match-card.completed .check-btn:hover {
             background-color: #059669; /* green-600 */
         }
+        /* Specific positioning for elements inside the card */
+        .card-top-left {
+            position: absolute;
+            top: 1.5rem;
+            left: 2.5rem;
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            color: #6b7280; /* text-gray-500 */
+        }
+        .card-top-right {
+            position: absolute;
+            top: 1.5rem;
+            right: 2.5rem;
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            color: #6b7280; /* text-gray-500 */
+        }
+        .card-bottom-center {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center">
+<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center relative">
+    
     <div class="container max-w-5xl mx-auto space-y-8">
+        
         <div class="input-section text-center">
+            <!-- Version and Creator inside the card -->
+            <div class="card-top-left">
+                <span class="text-gray-500 font-semibold">Version:</span>
+                <span class="text-gray-700 font-bold">1.0</span>
+            </div>
+            <div class="card-top-right">
+                <span class="text-gray-500 font-semibold">製作者:</span>
+                <a href="https://youtube.com/@ikumenrider?si=LXddF5sxgnGMxwHd" target="_blank" class="p-1 px-3 bg-gray-200 text-gray-700 rounded-lg text-sm font-bold transition-all duration-200 transform hover:scale-105 hover:bg-gray-300">
+                    育面ライダー
+                </a>
+            </div>
+
             <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
                 <i class="fas fa-trophy text-yellow-500"></i> 総当たり戦アプリ
             </h1>
@@ -175,15 +213,19 @@
                 </label>
                 <textarea id="teams-input"
                     class="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="例：&#10;山田&#10;田中&#10;佐藤&#10;..."></textarea>
+                    placeholder="選手名1&#10;選手名2&#10;選手名3&#10;..."></textarea>
                 <div class="text-sm text-gray-500 text-left mt-1">
                     <span id="player-count">現在 0 人入力済み</span>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-4 mt-6 justify-center">
+                <!-- Buttons are now in a vertical flex container on small screens, horizontal on larger screens -->
+                <div class="flex flex-col gap-4 mt-6 justify-center items-center">
                     <button id="generate-btn"
                         class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center gap-2">
                         <i class="fas fa-play"></i> スケジュール生成
                     </button>
+                    <a id="btn-app-list" href="https://ikumenrider.github.io/ikumenrider/" target="_blank" class="px-6 py-3 bg-green-300 text-gray-900 font-bold rounded-xl shadow-lg hover:bg-green-400 transition-all duration-200 transform hover:scale-105 text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-th-list"></i> アプリ一覧
+                    </a>
                     <button id="reset-btn"
                         class="px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 hidden flex items-center justify-center gap-2">
                         <i class="fas fa-redo"></i> リセット
@@ -246,14 +288,14 @@
                             </tbody>
                         </table>
                     </div>
-                    <button id="start-new-game-btn" class="mt-4 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto">
+                    <button id="start-new-game-btn" class="mt-4 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center justify-center gap-2">
                         <i class="fas fa-sync-alt"></i> もう1度同じメンバーで始める
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Custom message box -->
     <div id="message-box" class="fixed top-4 right-4 bg-gray-800 text-white text-sm py-3 px-6 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none">
         メッセージ
@@ -271,7 +313,7 @@
             const roundRobinBody = document.getElementById('round-robin-body');
             const messageBox = document.getElementById('message-box');
             const playerCountSpan = document.getElementById('player-count');
-            const startNewGameBtn = document.getElementById('start-new-game-btn'); // 新しいボタン
+            const startNewGameBtn = document.getElementById('start-new-game-btn');
 
             let teams = [];
             let matches = [];
@@ -364,7 +406,6 @@
                 updateScoreboard();
                 showMessage('新しい総当たり戦が開始されました。', 'success');
             });
-
 
             // Function to generate the round-robin schedule
             const generateSchedule = () => {

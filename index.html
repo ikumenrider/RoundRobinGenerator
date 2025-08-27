@@ -199,37 +199,39 @@
             </div>
             <div class="card-top-right">
                 <span class="text-gray-500 font-semibold">製作者:</span>
-                <a href="https://youtube.com/@ikumenrider?si=LXddF5sxgnGMxwHd" target="_blank" class="p-1 px-3 bg-gray-200 text-gray-700 rounded-lg text-sm font-bold transition-all duration-200 transform hover:scale-105 hover:bg-gray-300">
+                <a href="https://youtube.com/@ikumenrider?si=LXddF5sxgnGMxwHd" target="_blank" class="p-1 px-3 bg-gray-200 text-gray-900 rounded-lg text-sm font-bold transition-all duration-200 transform hover:scale-105 hover:bg-gray-300">
                     育面ライダー
                 </a>
             </div>
-
-            <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
-                <i class="fas fa-trophy text-yellow-500"></i> 総当たり戦アプリ
-            </h1>
-            <div class="mt-8">
-                <label for="teams-input" class="block text-lg font-medium text-gray-700 mb-2">
-                    参加者の名前を入力してください（1行に1名）:
-                </label>
-                <textarea id="teams-input"
-                    class="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="選手名1&#10;選手名2&#10;選手名3&#10;..."></textarea>
-                <div class="text-sm text-gray-500 text-left mt-1">
-                    <span id="player-count">現在 0 人入力済み</span>
-                </div>
-                <!-- Buttons are now in a vertical flex container on small screens, horizontal on larger screens -->
-                <div class="flex flex-col gap-4 mt-6 justify-center items-center">
-                    <button id="generate-btn"
-                        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center gap-2">
-                        <i class="fas fa-play"></i> スケジュール生成
-                    </button>
-                    <a id="btn-app-list" href="https://ikumenrider.github.io/ikumenrider/" target="_blank" class="px-6 py-3 bg-green-300 text-gray-900 font-bold rounded-xl shadow-lg hover:bg-green-400 transition-all duration-200 transform hover:scale-105 text-sm flex items-center justify-center gap-2">
-                        <i class="fas fa-th-list"></i> アプリ一覧
-                    </a>
-                    <button id="reset-btn"
-                        class="px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 hidden flex items-center justify-center gap-2">
-                        <i class="fas fa-redo"></i> リセット
-                    </button>
+            <!-- 新しく追加したdivでコンテンツを囲み、上部マージンを設定 -->
+            <div class="mt-12 md:mt-16">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                    総当たり戦アプリ
+                </h1>
+                <div class="mt-8">
+                    <label for="teams-input" class="block text-lg font-medium text-gray-700 mb-2">
+                        参加者の名前を入力してください（1行に1名）:
+                    </label>
+                    <textarea id="teams-input"
+                        class="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="選手名1&#10;選手名2&#10;選手名3&#10;..."></textarea>
+                    <div class="text-sm text-gray-500 text-left mt-1">
+                        <span id="player-count">現在 0 人入力済み</span>
+                    </div>
+                    <!-- Buttons are now in a vertical flex container on small screens, horizontal on larger screens -->
+                    <div class="flex flex-col gap-4 mt-6 justify-center items-center">
+                        <button id="generate-btn"
+                            class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center gap-2">
+                            <i class="fas fa-play"></i> スケジュール生成
+                        </button>
+                        <a id="btn-app-list" href="https://ikumenrider.github.io/ikumenrider/" target="_blank" class="px-6 py-3 bg-green-300 text-gray-900 font-bold rounded-xl shadow-lg hover:bg-green-400 transition-all duration-200 transform hover:scale-105 text-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-th-list"></i> アプリ一覧
+                        </a>
+                        <button id="reset-btn"
+                            class="px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 hidden flex items-center justify-center gap-2">
+                            <i class="fas fa-redo"></i> リセット
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -610,7 +612,7 @@
                 // Reset stats for all teams
                 const initialTeams = teams.filter(t => t !== 'bye');
                 initialTeams.forEach(team => {
-                    teamStats[team] = { win: 0, lose: 0, draw: 0, score: 0, conceded: 0, points: 0, matchesPlayed: 0, directWins: {} };
+                    teamStats[team] = { win: 0, lose: 0, draw: 0, score: 0, conceded: 0, points: 0, directWins: {} };
                 });
 
                 matches.forEach(match => {

@@ -333,6 +333,7 @@
             const messageBox = document.getElementById('message-box');
             const playerCountSpan = document.getElementById('player-count');
             const startNewGameBtn = document.getElementById('start-new-game-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
 
             let teams = [];
             let matches = [];
@@ -712,6 +713,20 @@
                     scoreboardBody.appendChild(row);
                 });
             };
+
+            // Fullscreen functionality
+            fullscreenBtn.addEventListener('click', () => {
+                const element = document.documentElement; // Get the root element (<html>)
+                if (document.fullscreenElement) {
+                    // Exit fullscreen if currently in fullscreen mode
+                    document.exitFullscreen();
+                } else {
+                    // Request fullscreen
+                    element.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                }
+            });
 
             // Call the function initially to set the count to 0
             updatePlayerCount();
